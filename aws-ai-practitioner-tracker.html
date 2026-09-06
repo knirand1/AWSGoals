@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIF-C01 // 14-Day Flight Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0e1a2b;
+    --bg-panel: #122238;
+    --line: #2a3c58;
+    --ink: #e9edf3;
+    --ink-dim: #93a3bd;
+    --amber: #e0a84e;
+    --teal: #57b8a8;
+    --danger: #d9705c;
+    --radius: 3px;
+    font-size: 16px;
+  }
+  *{ box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  a { color: var(--amber); }
+
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  /* ---------- shell ---------- */
+  .shell{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 36px;
+  }
+  @media (max-width: 880px){
+    .shell{ grid-template-columns: 1fr; }
+    .sidebar{ position: static !important; order: 2; }
+    .timeline-wrap{ order: 1; }
+  }
+
+  header.masthead{
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  header.masthead h1{
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: 0.2px;
+  }
+  header.masthead .subtitle{
+    color: var(--ink-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+  }
+  header.masthead .exam-code{
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--amber);
+    font-size: 0.8rem;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: var(--radius);
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .panel{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 18px 20px;
+  }
+  .panel h2{
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: none;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    margin: 0 0 12px;
+  }
+
+  .dial{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .dial svg{ flex-shrink: 0; }
+  .dial-num{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .dial-label{
+    color: var(--ink-dim);
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+
+  .stat-row{
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-top: 1px dashed var(--line);
+    font-size: 0.86rem;
+  }
+  .stat-row:first-of-type{ border-top: none; }
+  .stat-row .v{ font-family: 'IBM Plex Mono', monospace; color: var(--amber); }
+
+  .domain-bar-row{ margin-bottom: 12px; }
+  .domain-bar-row:last-child{ margin-bottom: 0; }
+  .domain-bar-top{
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    color: var(--ink-dim);
+    margin-bottom: 5px;
+  }
+  .domain-bar-track{
+    height: 6px;
+    background: #0a1728;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .domain-bar-fill{
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--amber));
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  button.reset-btn{
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    padding: 9px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  button.reset-btn:hover{ border-color: var(--danger); color: var(--danger); }
+
+  .save-note{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+    opacity: 0.75;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline-wrap{ position: relative; }
+  .timeline-wrap::before{
+    content: "";
+    position: absolute;
+    left: 27px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .day{
+    position: relative;
+    padding-left: 66px;
+    margin-bottom: 14px;
+  }
+  .day-node{
+    position: absolute;
+    left: 12px;
+    top: 18px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-dim);
+    z-index: 2;
+    transition: all 0.25s ease;
+  }
+  .day.complete .day-node{
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #06231e;
+    font-weight: 600;
+  }
+  .day.partial .day-node{
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .day-card{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .day.complete .day-card{ border-color: rgba(87,184,168,0.4); }
+
+  .day-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .day-head:hover{ background: rgba(255,255,255,0.02); }
+  .day-head-left{ min-width: 0; }
+  .day-domain{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .day-goal{
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .day-head-right{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .day-frac{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+  }
+  .chevron{
+    width: 9px; height: 9px;
+    border-right: 1px solid var(--ink-dim);
+    border-bottom: 1px solid var(--ink-dim);
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+  }
+  .day.open .chevron{ transform: rotate(45deg); }
+
+  .day-body{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    border-top: 1px solid transparent;
+  }
+  .day.open .day-body{
+    border-top: 1px solid var(--line);
+  }
+
+  .task-list{
+    list-style: none;
+    margin: 0;
+    padding: 6px 10px 14px;
+  }
+  .task{
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 9px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .task:hover{ background: rgba(255,255,255,0.03); }
+  .task input{
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    margin-top: 2px;
+    border: 1px solid var(--ink-dim);
+    border-radius: 3px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+  }
+  .task input:checked{
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .task input:checked::after{
+    content: "";
+    position: absolute;
+    left: 5px; top: 1.5px;
+    width: 4px; height: 8px;
+    border: solid #06231e;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .task span{ font-size: 0.92rem; color: var(--ink); }
+  .task.done span{ color: var(--ink-dim); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  footer{
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--ink-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div>
+      <h1>14-Day Flight Log</h1>
+      <div class="subtitle">Study plan for the AWS Certified AI Practitioner</div>
+    </div>
+    <div class="exam-code">AIF-C01</div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="panel">
+      <h2>Overall Progress</h2>
+      <div class="dial">
+        <svg width="76" height="76" viewBox="0 0 76 76">
+          <circle cx="38" cy="38" r="32" fill="none" stroke="#0a1728" stroke-width="8"/>
+          <circle id="ringFill" cx="38" cy="38" r="32" fill="none" stroke="#e0a84e" stroke-width="8"
+                  stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201"
+                  transform="rotate(-90 38 38)"/>
+        </svg>
+        <div>
+          <div class="dial-num"><span id="pctNum">0</span>%</div>
+          <div class="dial-label">tasks complete</div>
+        </div>
+      </div>
+      <div class="stat-row"><span>Days finished</span><span class="v"><span id="daysDone">0</span> / 14</span></div>
+      <div class="stat-row"><span>Tasks finished</span><span class="v"><span id="tasksDone">0</span> / <span id="tasksTotal">0</span></span></div>
+      <div class="stat-row"><span>Current day</span><span class="v" id="currentDay">Day 1</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>By Domain</h2>
+      <div id="domainBars"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Data</h2>
+      <button class="reset-btn" id="resetBtn">Reset all progress</button>
+      <div class="save-note">
+        Progress saves automatically to this browser (localStorage) — no server, no account.
+        On GitHub Pages this persists across visits on the same device/browser.
+        Clearing site data or switching browsers starts you fresh.
+      </div>
+    </div>
+  </aside>
+
+  <div class="timeline-wrap" id="timeline"></div>
+
+  <footer>AWS Certified AI Practitioner (AIF-C01) &middot; foundational cert &middot; 65 questions / 90 min / 700 to pass</footer>
+</div>
+
+<script>
+const PLAN = [
+  { domain: "Domain 1 · AI & ML Fundamentals", goal: "Define AI/ML/DL/Gen AI/NLP and the 3 ML learning types cold",
+    tasks: [
+      "Watch the AWS Skill Builder \u2018Fundamentals of AI/ML\u2019 module",
+      "Learn the difference: AI vs ML vs Deep Learning vs Generative AI vs NLP",
+      "Learn the 3 ML learning types: supervised, unsupervised, reinforcement",
+      "Skim the AIF-C01 Exam Guide PDF and note the 5 domain weightings"
+    ]},
+  { domain: "Domain 1 · AI & ML Fundamentals", goal: "Trace a model from raw data to a deployed endpoint",
+    tasks: [
+      "Learn the ML pipeline: collect \u2192 prep \u2192 feature engineer \u2192 train \u2192 evaluate \u2192 deploy \u2192 monitor",
+      "Learn key metrics: accuracy, precision, recall, F1, AUC, RMSE",
+      "Overview Amazon SageMaker: Studio, Data Wrangler, Feature Store, Ground Truth",
+      "Do 10 practice questions from Domain 1"
+    ]},
+  { domain: "Domain 2 · Generative AI Fundamentals", goal: "Explain how a foundation model actually generates output",
+    tasks: [
+      "Learn transformers, tokens, embeddings, and diffusion models at a conceptual level",
+      "Learn what a foundation model is, and pretraining vs fine-tuning",
+      "Overview Amazon Bedrock: what it is and which model providers it hosts",
+      "Build flashcards for: LLM, multimodal, context window, inference"
+    ]},
+  { domain: "Domain 2 · Generative AI Fundamentals", goal: "Match a use case to gen AI \u2014 and name its failure mode",
+    tasks: [
+      "List gen AI use cases: content generation, summarization, code generation, chatbots",
+      "Learn the limitations: hallucination, bias, non-determinism, cost, latency",
+      "Practice arguing gen AI vs traditional ML for a given business problem",
+      "Do 15 practice questions from Domain 2"
+    ]},
+  { domain: "Domain 3 · Foundation Model Applications", goal: "Write one prompt using every core prompting technique",
+    tasks: [
+      "Learn prompt engineering techniques: zero-shot, few-shot, chain-of-thought, negative prompting",
+      "Learn prompt structure best practices and basic prompt-injection risk",
+      "If you have an AWS account, try the Bedrock Playground hands-on",
+      "Overview Amazon Q and what it's used for"
+    ]},
+  { domain: "Domain 3 · Foundation Model Applications", goal: "Decide RAG vs. fine-tuning vs. prompting for a scenario",
+    tasks: [
+      "Learn RAG architecture and when it's the right tool",
+      "Compare fine-tuning vs continued pretraining vs RAG on cost and complexity",
+      "Overview Bedrock Knowledge Bases and Amazon Kendra",
+      "Learn vector databases: OpenSearch, Aurora pgvector, Bedrock embeddings"
+    ]},
+  { domain: "Domain 3 · Foundation Model Applications", goal: "Pick the right model + metric for 5 cold scenarios",
+    tasks: [
+      "Learn model selection criteria: cost, latency, context length, modality, accuracy",
+      "Learn evaluation methods: human eval, benchmarks, BLEU/ROUGE, model cards",
+      "Overview SageMaker JumpStart and Bedrock model evaluation",
+      "Do 20 mixed practice questions from Domains 2\u20133 \u2014 target 75%+"
+    ]},
+  { domain: "Domain 4 · Responsible AI", goal: "Name AWS's 8 responsible-AI dimensions unprompted",
+    tasks: [
+      "Memorize: fairness, explainability, robustness, privacy, safety, controllability, veracity, transparency",
+      "Learn sources of bias: data bias, algorithmic bias, human bias",
+      "Overview SageMaker Clarify for bias detection"
+    ]},
+  { domain: "Domain 4 · Responsible AI", goal: "Design a guardrail for one risky gen AI use case",
+    tasks: [
+      "Overview Amazon Bedrock Guardrails and what they filter",
+      "Learn model cards, AI service cards, and transparency documentation",
+      "Learn human-in-the-loop design patterns",
+      "Do 15 practice questions from Domain 4 \u2014 target 75%+"
+    ]},
+  { domain: "Domain 5 · Security, Compliance & Governance", goal: "Map the shared responsibility model onto a Bedrock app",
+    tasks: [
+      "Learn the AWS shared responsibility model",
+      "Learn IAM basics for AI workloads: roles, policies, least privilege",
+      "Learn encryption at rest/in transit, PrivateLink, VPC endpoints"
+    ]},
+  { domain: "Domain 5 · Security, Compliance & Governance", goal: "Match each compliance tool to the audit question it answers",
+    tasks: [
+      "Learn AWS Artifact, AWS Audit Manager, and AWS Config",
+      "Learn data governance concepts: training data provenance, data residency",
+      "Overview Amazon Macie for sensitive data discovery",
+      "Do 15 practice questions from Domain 5 \u2014 target 75%+"
+    ]},
+  { domain: "All Domains · Service Roundup", goal: "Match all 8 purpose-built AI services to a use case, no notes",
+    tasks: [
+      "Deep-dive: Rekognition, Comprehend, Lex, Polly, Textract, Transcribe, Translate, Q",
+      "Write a one-page service cheat sheet in your own words",
+      "Do 25 mixed practice questions across all 5 domains"
+    ]},
+  { domain: "Exam Simulation", goal: "Sit a timed 65-question exam and hit 75%+",
+    tasks: [
+      "Take one full-length practice exam under real timed conditions (90 min)",
+      "Score the result and log accuracy by domain",
+      "Identify your two weakest domains and re-study only those"
+    ]},
+  { domain: "Exam Day", goal: "Walk in ready \u2014 no new material today",
+    tasks: [
+      "Skim only your cheat sheet and weak-domain notes",
+      "Take one final short practice set (20\u201325 questions) to confirm readiness",
+      "Confirm exam logistics: ID, testing environment/location, arrival time",
+      "Take the exam"
+    ]}
+];
+
+const STORAGE_KEY = "aif-c01-tracker-progress-v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return PLAN.map(d => d.tasks.map(() => false));
+}
+function saveState(state){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+let state = loadState();
+// guard against plan/state length mismatch (e.g. edited plan later)
+if(state.length !== PLAN.length){
+  state = PLAN.map(d => d.tasks.map(() => false));
+}
+
+const timeline = document.getElementById("timeline");
+
+function render(){
+  timeline.innerHTML = "";
+  let totalTasks = 0, doneTasks = 0, daysComplete = 0;
+  const domainTotals = {};
+
+  PLAN.forEach((day, di) => {
+    const dayDone = state[di].filter(Boolean).length;
+    const dayTotal = day.tasks.length;
+    totalTasks += dayTotal;
+    doneTasks += dayDone;
+    if(dayDone === dayTotal) daysComplete++;
+
+    if(!domainTotals[day.domain]) domainTotals[day.domain] = {done:0, total:0};
+    domainTotals[day.domain].done += dayDone;
+    domainTotals[day.domain].total += dayTotal;
+
+    const dayEl = document.createElement("div");
+    dayEl.className = "day" + (dayDone === dayTotal ? " complete" : dayDone > 0 ? " partial" : "");
+    dayEl.dataset.open = "false";
+
+    dayEl.innerHTML = `
+      <div class="day-node mono">${dayDone === dayTotal ? "\u2713" : di + 1}</div>
+      <div class="day-card">
+        <div class="day-head">
+          <div class="day-head-left">
+            <span class="day-domain">DAY ${di + 1} &middot; ${day.domain}</span>
+            <div class="day-goal">${day.goal}</div>
+          </div>
+          <div class="day-head-right">
+            <span class="day-frac">${dayDone}/${dayTotal}</span>
+            <span class="chevron"></span>
+          </div>
+        </div>
+        <div class="day-body">
+          <ul class="task-list">
+            ${day.tasks.map((t, ti) => `
+              <li class="task ${state[di][ti] ? "done" : ""}" data-day="${di}" data-task="${ti}">
+                <input type="checkbox" ${state[di][ti] ? "checked" : ""} tabindex="-1">
+                <span>${t}</span>
+              </li>`).join("")}
+          </ul>
+        </div>
+      </div>
+    `;
+    timeline.appendChild(dayEl);
+  });
+
+  // sidebar stats
+  const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("daysDone").textContent = daysComplete;
+  document.getElementById("tasksDone").textContent = doneTasks;
+  document.getElementById("tasksTotal").textContent = totalTasks;
+
+  const circumference = 2 * Math.PI * 32;
+  const ring = document.getElementById("ringFill");
+  ring.setAttribute("stroke-dasharray", circumference);
+  ring.setAttribute("stroke-dashoffset", circumference - (pct / 100) * circumference);
+
+  const firstUnfinished = state.findIndex(d => d.some(t => !t));
+  document.getElementById("currentDay").textContent =
+    firstUnfinished === -1 ? "All done \u2014 go pass it" : `Day ${firstUnfinished + 1}`;
+
+  // domain bars
+  const barsEl = document.getElementById("domainBars");
+  barsEl.innerHTML = Object.entries(domainTotals).map(([name, v]) => {
+    const p = Math.round((v.done / v.total) * 100);
+    return `
+      <div class="domain-bar-row">
+        <div class="domain-bar-top"><span>${name}</span><span class="mono">${p}%</span></div>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:${p}%"></div></div>
+      </div>`;
+  }).join("");
+}
+
+timeline.addEventListener("click", (e) => {
+  const taskEl = e.target.closest(".task");
+  const headEl = e.target.closest(".day-head");
+
+  if(taskEl){
+    const d = +taskEl.dataset.day, t = +taskEl.dataset.task;
+    state[d][t] = !state[d][t];
+    saveState(state);
+    render();
+    // re-open the day we just edited
+    const dayEls = document.querySelectorAll(".day");
+    dayEls[d].classList.add("open");
+    dayEls[d].querySelector(".day-body").style.maxHeight = dayEls[d].querySelector(".day-body").scrollHeight + "px";
+    return;
+  }
+  if(headEl){
+    const dayEl = headEl.closest(".day");
+    const body = dayEl.querySelector(".day-body");
+    const isOpen = dayEl.classList.toggle("open");
+    body.style.maxHeight = isOpen ? body.scrollHeight + "px" : "0px";
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(confirm("Reset all 14 days of progress? This can't be undone.")){
+    state = PLAN.map(d => d.tasks.map(() => false));
+    saveState(state);
+    render();
+  }
+});
+
+render();
+// open Day 1 by default
+document.querySelector(".day").classList.add("open");
+document.querySelector(".day .day-body").style.maxHeight =
+  document.querySelector(".day .day-body").scrollHeight + "px";
+</script>
+
+</body>
+</html>
