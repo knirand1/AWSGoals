@@ -343,9 +343,155 @@
     padding-top: 18px;
     border-top: 1px dashed var(--line);
   }
+
+  /* ---------- user gate ---------- */
+  .gate-overlay{
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 24px;
+  }
+  .gate-card{
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 26px 24px;
+  }
+  .gate-card h2{
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .gate-card .gate-sub{
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  .gate-card label{
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .gate-card input[type="text"]{
+    width: 100%;
+    background: #0a1728;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: 'Source Serif 4', serif;
+    font-size: 1rem;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+  }
+  .gate-card input[type="text"]:focus{
+    outline: none;
+    border-color: var(--amber);
+  }
+  .gate-go{
+    width: 100%;
+    background: var(--amber);
+    border: none;
+    color: #2a1a03;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 11px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .gate-go:hover{ filter: brightness(1.08); }
+
+  .gate-existing{
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+  }
+  .gate-existing-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .gate-profile{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 7px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .gate-profile:hover{ border-color: var(--teal); }
+  .gate-profile .pct{
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--teal);
+    font-size: 0.78rem;
+  }
+  .gate-profile .del{
+    color: var(--danger);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    margin-left: 8px;
+  }
+  .gate-profile .del:hover{ text-decoration: underline; }
+
+  .user-chip{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+  }
+  .user-chip .name{ color: var(--amber); }
+  .user-chip button{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    padding: 5px 9px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .user-chip button:hover{ border-color: var(--amber); color: var(--amber); }
+
+  body.gate-active .shell{ display: none; }
 </style>
 </head>
 <body>
+
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <h2>Who's studying?</h2>
+    <div class="gate-sub">Enter a name to start or resume your 14-day plan. Saved only in this browser.</div>
+    <label for="nameInput">Your name</label>
+    <input type="text" id="nameInput" placeholder="e.g. Jussi" maxlength="30" autocomplete="off">
+    <button class="gate-go" id="gateGoBtn">Start / Resume</button>
+    <div class="gate-existing" id="gateExisting" style="display:none;">
+      <div class="gate-existing-label">OR PICK UP A SAVED PROFILE</div>
+      <div id="gateProfileList"></div>
+    </div>
+  </div>
+</div>
 
 <div class="shell">
 
@@ -354,7 +500,13 @@
       <h1>14-Day Flight Log</h1>
       <div class="subtitle">Study plan for the AWS Certified AI Practitioner</div>
     </div>
-    <div class="exam-code">AIF-C01</div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="user-chip">
+        <span>Studying as <span class="name" id="userChipName">\u2014</span></span>
+        <button id="switchUserBtn">Switch user</button>
+      </div>
+      <div class="exam-code">AIF-C01</div>
+    </div>
   </header>
 
   <aside class="sidebar">
@@ -496,24 +648,94 @@ const PLAN = [
     ]}
 ];
 
-const STORAGE_KEY = "aif-c01-tracker-progress-v1";
+const STORE_KEY = "aif-c01-tracker-users-v1";
 
-function loadState(){
+function blankState(){ return PLAN.map(d => d.tasks.map(() => false)); }
+
+function loadStore(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORE_KEY);
     if(raw) return JSON.parse(raw);
   }catch(e){}
-  return PLAN.map(d => d.tasks.map(() => false));
+  return { profiles: {}, current: null };
 }
-function saveState(state){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+function saveStore(store){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
 }
 
-let state = loadState();
-// guard against plan/state length mismatch (e.g. edited plan later)
-if(state.length !== PLAN.length){
-  state = PLAN.map(d => d.tasks.map(() => false));
+let store = loadStore();
+let currentUser = null;
+let state = blankState();
+
+function progressPct(s){
+  const total = s.flat().length;
+  const done = s.flat().filter(Boolean).length;
+  return total ? Math.round((done/total)*100) : 0;
 }
+
+function switchToUser(name){
+  name = name.trim();
+  if(!name) return;
+  if(!store.profiles[name]) store.profiles[name] = blankState();
+  // guard against plan length changes since a profile was created
+  if(store.profiles[name].length !== PLAN.length) store.profiles[name] = blankState();
+  store.current = name;
+  saveStore(store);
+  currentUser = name;
+  state = store.profiles[name];
+  document.getElementById("userChipName").textContent = name;
+  document.body.classList.remove("gate-active");
+  render();
+  openDayOneDefault();
+}
+
+function saveState(){
+  store.profiles[currentUser] = state;
+  saveStore(store);
+}
+
+function openGate(){
+  document.body.classList.add("gate-active");
+  document.getElementById("nameInput").value = "";
+  const names = Object.keys(store.profiles);
+  const existingEl = document.getElementById("gateExisting");
+  const listEl = document.getElementById("gateProfileList");
+  if(names.length){
+    existingEl.style.display = "block";
+    listEl.innerHTML = names.map(n => `
+      <div class="gate-profile" data-name="${n}">
+        <span>${n}</span>
+        <span><span class="pct">${progressPct(store.profiles[n])}%</span><span class="del" data-del="${n}">remove</span></span>
+      </div>`).join("");
+  } else {
+    existingEl.style.display = "none";
+  }
+  document.getElementById("nameInput").focus();
+}
+
+document.getElementById("gateGoBtn").addEventListener("click", () => {
+  switchToUser(document.getElementById("nameInput").value);
+});
+document.getElementById("nameInput").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") switchToUser(e.target.value);
+});
+document.getElementById("gateProfileList").addEventListener("click", (e) => {
+  const del = e.target.closest(".del");
+  if(del){
+    e.stopPropagation();
+    const n = del.dataset.del;
+    if(confirm(`Remove saved profile "${n}"? This can't be undone.`)){
+      delete store.profiles[n];
+      if(store.current === n) store.current = null;
+      saveStore(store);
+      openGate();
+    }
+    return;
+  }
+  const row = e.target.closest(".gate-profile");
+  if(row) switchToUser(row.dataset.name);
+});
+document.getElementById("switchUserBtn").addEventListener("click", openGate);
 
 const timeline = document.getElementById("timeline");
 
@@ -599,7 +821,7 @@ timeline.addEventListener("click", (e) => {
   if(taskEl){
     const d = +taskEl.dataset.day, t = +taskEl.dataset.task;
     state[d][t] = !state[d][t];
-    saveState(state);
+    saveState();
     render();
     // re-open the day we just edited
     const dayEls = document.querySelectorAll(".day");
@@ -616,18 +838,28 @@ timeline.addEventListener("click", (e) => {
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if(confirm("Reset all 14 days of progress? This can't be undone.")){
-    state = PLAN.map(d => d.tasks.map(() => false));
-    saveState(state);
+  if(confirm(`Reset all 14 days of progress for "${currentUser}"? This can't be undone.`)){
+    state = blankState();
+    saveState();
     render();
   }
 });
 
-render();
-// open Day 1 by default
-document.querySelector(".day").classList.add("open");
-document.querySelector(".day .day-body").style.maxHeight =
-  document.querySelector(".day .day-body").scrollHeight + "px";
+function openDayOneDefault(){
+  const firstDay = document.querySelector(".day");
+  if(!firstDay) return;
+  firstDay.classList.add("open");
+  firstDay.querySelector(".day-body").style.maxHeight =
+    firstDay.querySelector(".day-body").scrollHeight + "px";
+}
+
+// boot: resume last user if one exists, otherwise show the gate
+if(store.current && store.profiles[store.current]){
+  switchToUser(store.current);
+  openDayOneDefault();
+} else {
+  openGate();
+}
 </script>
 
 </body>
