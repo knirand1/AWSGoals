@@ -458,6 +458,197 @@
     margin-left: 8px;
   }
   .gate-profile .del:hover{ text-decoration: underline; }
+
+  /* ---------- flashcards ---------- */
+  .flash-card-panel{ padding: 18px; }
+  .flash-tabs{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .flash-tab{
+    background: #10131a;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 0.74rem;
+    padding: 7px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .flash-tab.active{ background: var(--lime); border-color: var(--lime); color: #10130a; }
+  .flash-tab:hover:not(.active){ border-color: var(--lime); color: var(--lime); }
+
+  .flash-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .flash-item{
+    background: #10131a;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    min-height: 108px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .flash-item:hover{ border-color: var(--lime); }
+  .flash-item .fc-tag{
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--ink-dim);
+    opacity: 0.6;
+  }
+  .flash-item .fc-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--lime);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .flash-item .fc-text{ font-size: 0.86rem; font-weight: 600; }
+  .flash-item.flipped .fc-text{ color: var(--ink-dim); font-weight: 500; }
+  .flash-item.flipped .fc-label{ color: var(--ink-dim); }
+
+  .quiz-btn{
+    width: 100%;
+    background: var(--lime);
+    border: none;
+    color: #10130a;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    padding: 13px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .quiz-btn:hover{ filter: brightness(1.06); }
+
+  /* ---------- quiz overlay ---------- */
+  .quiz-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,12,16,0.88);
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    padding: 20px;
+  }
+  .quiz-overlay.active{ display: flex; }
+  .quiz-card{
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 20px 24px;
+  }
+  .quiz-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .quiz-domain{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--lime);
+    letter-spacing: 0.04em;
+  }
+  .quiz-close{
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .quiz-close:hover{ color: var(--flame); }
+  .quiz-progress-track{
+    height: 5px;
+    background: #10131a;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .quiz-progress-fill{
+    height: 100%;
+    background: var(--lime);
+    width: 0%;
+    transition: width 0.25s ease;
+  }
+  .quiz-flip{
+    background: #10131a;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    min-height: 180px;
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .quiz-face{ font-size: 1.08rem; font-weight: 700; line-height: 1.45; }
+  .quiz-answer{ color: var(--lime); font-weight: 600; font-size: 1rem; }
+  .quiz-hint{
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 0.76rem;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 18px;
+  }
+  .quiz-actions{ display: flex; gap: 10px; }
+  .quiz-actions button{
+    flex: 1;
+    padding: 13px;
+    border-radius: 999px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 0.86rem;
+    border: none;
+    cursor: pointer;
+  }
+  .quiz-miss{ background: rgba(255,133,82,0.16); color: var(--flame); border: 1px solid rgba(255,133,82,0.4) !important; }
+  .quiz-miss:hover{ background: rgba(255,133,82,0.26); }
+  .quiz-got{ background: var(--lime); color: #10130a; }
+  .quiz-got:hover{ filter: brightness(1.06); }
+
+  .quiz-summary{ text-align: center; padding: 10px 0 0; }
+  .quiz-summary-score{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--lime);
+  }
+  .quiz-summary-sub{ color: var(--ink-dim); font-size: 0.85rem; margin: 4px 0 20px; }
+  .quiz-summary-actions{ display: flex; gap: 10px; }
+  .quiz-secondary{
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 13px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .quiz-secondary:hover{ border-color: var(--lime); color: var(--lime); }
 </style>
 </head>
 <body>
@@ -526,6 +717,16 @@
   </div>
 
   <div class="feed-head">
+    <h2>Flashcards</h2>
+    <span id="cardCountLabel">0 cards</span>
+  </div>
+  <div class="card flash-card-panel">
+    <div class="flash-tabs" id="flashTabs"></div>
+    <div class="flash-grid" id="flashGrid"></div>
+    <button class="quiz-btn" id="startQuizBtn">Test myself &middot; randomized</button>
+  </div>
+
+  <div class="feed-head">
     <h2>Your plan</h2>
     <span id="daysDoneLabel">0 / 14 days</span>
   </div>
@@ -535,6 +736,33 @@
   <div class="save-note">Saved automatically to this browser (localStorage) &mdash; separate per name, per device.</div>
 
   <footer>65 questions &middot; 90 minutes &middot; 700 to pass</footer>
+</div>
+
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-card">
+    <div class="quiz-top">
+      <span class="quiz-domain" id="quizDomain">Domain</span>
+      <button class="quiz-close" id="quizCloseBtn">&times;</button>
+    </div>
+    <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+    <div class="quiz-flip" id="quizFlip">
+      <div class="quiz-face quiz-question" id="quizQuestion"></div>
+      <div class="quiz-face quiz-answer" id="quizAnswer" style="display:none;"></div>
+    </div>
+    <div class="quiz-hint" id="quizHint">Tap the card to reveal the answer</div>
+    <div class="quiz-actions" id="quizGradeActions" style="display:none;">
+      <button class="quiz-miss" id="quizMissBtn">Missed it</button>
+      <button class="quiz-got" id="quizGotBtn">Got it</button>
+    </div>
+    <div class="quiz-summary" id="quizSummary" style="display:none;">
+      <div class="quiz-summary-score" id="quizSummaryScore">0%</div>
+      <div class="quiz-summary-sub" id="quizSummarySub">0 of 0 correct</div>
+      <div class="quiz-summary-actions">
+        <button class="quiz-secondary" id="quizRetryMissedBtn">Retry missed only</button>
+        <button class="quiz-got" id="quizDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -633,6 +861,63 @@ const PLAN = [
       "Confirm exam logistics: ID, testing environment/location, arrival time",
       "Take the exam"
     ]}
+];
+
+// Flashcards drafted from the official AWS Certified AI Practitioner (AIF-C01)
+// Exam Guide content outline (5 domains, task statements 1.1-5.2).
+const FLASHCARDS = [
+  { domain: "Domain 1", label: "AI & ML Fundamentals", cards: [
+    { q: "How do AI, ML, and deep learning relate to each other?", a: "AI is the broadest field (systems that mimic intelligent behavior). ML is a subset of AI that learns patterns from data instead of explicit rules. Deep learning is a subset of ML using multi-layer neural networks." },
+    { q: "What's the difference between batch and real-time inferencing?", a: "Batch inference processes a large set of data on a schedule, no immediate response needed. Real-time inference returns a prediction immediately for a single request via a live endpoint." },
+    { q: "Distinguish supervised, unsupervised, and reinforcement learning.", a: "Supervised: learns from labeled input-output pairs. Unsupervised: finds structure in unlabeled data (e.g. clustering). Reinforcement: learns via trial and error using rewards/penalties from an environment." },
+    { q: "Name five AWS pretrained AI services covered on the exam and what each does.", a: "Amazon Transcribe (speech-to-text), Amazon Translate (language translation), Amazon Comprehend (NLP/text analysis), Amazon Lex (conversational chatbots), Amazon Polly (text-to-speech)." },
+    { q: "List the main stages of an ML pipeline.", a: "Data collection \u2192 exploratory data analysis \u2192 data pre-processing \u2192 feature engineering \u2192 model training \u2192 hyperparameter tuning \u2192 evaluation \u2192 deployment \u2192 monitoring." },
+    { q: "What does MLOps mean at a conceptual level?", a: "Applying DevOps-style discipline to ML: repeatable processes, scalable systems, experiment tracking, managing technical debt, and continuous model monitoring and re-training in production." },
+    { q: "Give an example of a model performance metric and a business metric.", a: "Model metrics: accuracy, AUC, F1 score. Business metrics: cost per user, development cost, customer feedback, ROI." },
+    { q: "When is an AI/ML solution NOT the right choice?", a: "When a cost-benefit analysis doesn't justify it, or when the situation requires a guaranteed/deterministic outcome rather than a probabilistic prediction." }
+  ]},
+  { domain: "Domain 2", label: "Generative AI Fundamentals", cards: [
+    { q: "Define \u201cfoundation model.\u201d", a: "A large model pre-trained on broad, diverse data that can be adapted to many downstream tasks via prompting, fine-tuning, or other techniques." },
+    { q: "What's a token, and what's chunking?", a: "A token is a unit of text (word/sub-word/character) a model processes. Chunking splits large documents into smaller pieces so they fit a model's context window, often for RAG." },
+    { q: "What are embeddings/vectors used for?", a: "Numeric representations of meaning in high-dimensional space, so semantically similar items sit close together \u2014 the basis for semantic search and RAG retrieval." },
+    { q: "List the stages of the foundation model lifecycle.", a: "Data selection \u2192 model selection \u2192 pre-training \u2192 fine-tuning \u2192 evaluation \u2192 deployment \u2192 feedback." },
+    { q: "Name a key advantage and a key disadvantage of generative AI.", a: "Advantage: adaptability/responsiveness/simplicity to use. Disadvantage: hallucinations, weak interpretability, and nondeterminism (same prompt, different outputs)." },
+    { q: "What is Amazon Bedrock?", a: "A fully managed service giving API access to multiple foundation models from different providers, without managing any underlying infrastructure." },
+    { q: "How does Bedrock differ from SageMaker JumpStart for gen AI?", a: "Bedrock gives serverless API access to third-party and Amazon foundation models. JumpStart provides pre-built models/solutions you deploy on your own SageMaker infrastructure for more control." },
+    { q: "What's the cost tradeoff between token-based pricing and provisioned throughput?", a: "Token-based pricing is pay-as-you-go, good for variable workloads. Provisioned throughput reserves fixed capacity for predictable, high-volume, low-latency needs." }
+  ]},
+  { domain: "Domain 3", label: "Foundation Model Applications", cards: [
+    { q: "What criteria matter when choosing a pre-trained foundation model?", a: "Cost, modality, latency, multi-lingual support, model size/complexity, customization needs, and input/output length limits." },
+    { q: "What does the \u201ctemperature\u201d inference parameter control?", a: "How random/creative vs. deterministic/focused the output is \u2014 higher temperature means more varied output, lower means more consistent output." },
+    { q: "Define RAG and its main benefit.", a: "Retrieval Augmented Generation retrieves relevant external data at query time and feeds it into the prompt, so the model can use up-to-date or proprietary information without retraining." },
+    { q: "Name AWS services that can store vector embeddings for RAG.", a: "Amazon OpenSearch Service, Amazon Aurora, Amazon Neptune, Amazon DocumentDB (MongoDB-compatible), and Amazon RDS for PostgreSQL." },
+    { q: "Rank foundation model customization approaches by cost/complexity, cheapest first.", a: "In-context learning (prompting) \u2192 RAG \u2192 fine-tuning \u2192 full pre-training, roughly increasing in cost and complexity." },
+    { q: "What's the role of an \u201cagent\u201d in a gen AI application?", a: "An agent (e.g. Agents for Amazon Bedrock) orchestrates multi-step tasks by deciding which tools, APIs, or knowledge bases to call in sequence to complete a complex request." },
+    { q: "Name four prompt engineering techniques.", a: "Zero-shot (no examples), single-shot (one example), few-shot (several examples), and chain-of-thought (ask the model to reason step by step)." },
+    { q: "Name four prompt-related risks.", a: "Prompt exposure (leaking the system prompt), poisoning (corrupting training/retrieval data), hijacking, and jailbreaking (bypassing guardrails)." },
+    { q: "What's the difference between fine-tuning and continuous pre-training?", a: "Fine-tuning adapts a model to a specific task/domain using a smaller labeled dataset. Continuous pre-training keeps training the base model on new unlabeled data to expand general knowledge." },
+    { q: "Name two metrics used to evaluate foundation model output, and what they measure.", a: "ROUGE (overlap for summarization tasks) and BLEU (overlap for translation quality); BERTScore compares semantic similarity via embeddings." }
+  ]},
+  { domain: "Domain 4", label: "Responsible AI", cards: [
+    { q: "Name the core features of responsible AI referenced by AWS.", a: "Bias, fairness, inclusivity, robustness, safety, and veracity." },
+    { q: "What does Amazon SageMaker Clarify help you do?", a: "Detect bias in training data and model predictions, and help explain model behavior." },
+    { q: "Name a legal risk specific to generative AI outputs.", a: "Intellectual property infringement claims from AI-generated content, plus risks from biased outputs, hallucinations, and resulting loss of customer trust." },
+    { q: "What characteristics should a good training dataset have?", a: "Inclusivity, diversity, curated sourcing, and balance across relevant groups or classes." },
+    { q: "Distinguish bias from variance in plain terms.", a: "Bias is systematic error that makes a model consistently miss patterns (underfitting). Variance is sensitivity to training data noise that makes a model overfit." },
+    { q: "What is Amazon Augmented AI (A2I) used for?", a: "Adding a human review step into ML predictions \u2014 routing low-confidence or high-stakes outputs to a human before acting on them." },
+    { q: "What are SageMaker Model Cards for?", a: "Documenting a model's intended use, training data, performance, and limitations \u2014 supporting transparency and explainability." },
+    { q: "What's the tradeoff between model transparency and performance?", a: "More interpretable/transparent models are often easier to explain but may sacrifice some predictive performance compared to complex \u201cblack box\u201d models." }
+  ]},
+  { domain: "Domain 5", label: "Security, Compliance & Governance", cards: [
+    { q: "State the AWS shared responsibility model in one sentence.", a: "AWS secures the underlying cloud infrastructure (\u201csecurity of the cloud\u201d); the customer secures what they build and configure on top, including their AI/ML data and models (\u201csecurity in the cloud\u201d)." },
+    { q: "What does Amazon Macie do?", a: "Uses ML to automatically discover, classify, and help protect sensitive data such as PII stored in Amazon S3." },
+    { q: "What is AWS PrivateLink used for in an AI context?", a: "Privately connecting to AWS services (e.g. Bedrock) from your VPC without traversing the public internet, reducing exposure." },
+    { q: "What is data lineage, and what helps document it for a model?", a: "Data lineage tracks where data originated and how it was transformed. SageMaker Model Cards help document data origins and model details for traceability." },
+    { q: "Name three AWS governance/compliance services and what each is for.", a: "AWS Config (tracks resource configuration compliance), AWS Audit Manager (automates evidence collection for audits), AWS Artifact (on-demand access to AWS compliance reports/agreements)." },
+    { q: "Name two compliance standards referenced for AI systems.", a: "ISO standards and SOC (System and Organization Controls) reports, alongside emerging algorithm accountability laws." },
+    { q: "What is the Generative AI Security Scoping Matrix?", a: "A governance framework that helps organizations classify gen AI use cases by risk/responsibility level, to apply the right security and compliance controls." },
+    { q: "Name a data governance strategy element for AI systems.", a: "Data lifecycle management, logging, data residency requirements, ongoing monitoring, and defined retention policies." }
+  ]}
 ];
 
 const STORE_KEY = "aif-c01-tracker-users-v1";
@@ -874,6 +1159,154 @@ document.getElementById("resetBtn").addEventListener("click", () => {
     render();
   }
 });
+
+// ---------- flashcards ----------
+const ALL_CARDS = FLASHCARDS.flatMap(section =>
+  section.cards.map(c => ({ ...c, domain: section.domain, label: section.label }))
+);
+
+let flashFilter = "All";
+
+function renderFlashTabs(){
+  const tabsEl = document.getElementById("flashTabs");
+  const domains = ["All", ...FLASHCARDS.map(s => s.domain)];
+  tabsEl.innerHTML = domains.map(d => {
+    const short = d === "All" ? "All" : d;
+    return `<button class="flash-tab ${d === flashFilter ? "active" : ""}" data-filter="${d}">${short}</button>`;
+  }).join("");
+}
+
+function renderFlashGrid(){
+  const gridEl = document.getElementById("flashGrid");
+  const cards = flashFilter === "All" ? ALL_CARDS : ALL_CARDS.filter(c => c.domain === flashFilter);
+  document.getElementById("cardCountLabel").textContent = `${cards.length} cards`;
+  gridEl.innerHTML = cards.map((c, i) => `
+    <div class="flash-item" data-idx="${i}">
+      <span class="fc-tag">${c.domain}</span>
+      <div class="fc-label">Q</div>
+      <div class="fc-text">${c.q}</div>
+    </div>
+  `).join("");
+  gridEl.dataset.cards = JSON.stringify(cards);
+}
+
+document.getElementById("flashTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".flash-tab");
+  if(!btn) return;
+  flashFilter = btn.dataset.filter;
+  renderFlashTabs();
+  renderFlashGrid();
+});
+
+document.getElementById("flashGrid").addEventListener("click", (e) => {
+  const item = e.target.closest(".flash-item");
+  if(!item) return;
+  const cards = JSON.parse(document.getElementById("flashGrid").dataset.cards || "[]");
+  const card = cards[+item.dataset.idx];
+  const isFlipped = item.classList.toggle("flipped");
+  item.querySelector(".fc-label").textContent = isFlipped ? "A" : "Q";
+  item.querySelector(".fc-text").textContent = isFlipped ? card.a : card.q;
+});
+
+// ---------- quiz mode ----------
+let quizDeck = [];
+let quizIdx = 0;
+let quizScore = 0;
+let quizMissed = [];
+let quizRevealed = false;
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(deck){
+  quizDeck = shuffle(deck);
+  quizIdx = 0;
+  quizScore = 0;
+  quizMissed = [];
+  document.getElementById("quizOverlay").classList.add("active");
+  document.getElementById("quizSummary").style.display = "none";
+  document.getElementById("quizFlip").style.display = "flex";
+  document.getElementById("quizHint").style.display = "block";
+  showQuizCard();
+}
+
+function showQuizCard(){
+  quizRevealed = false;
+  const card = quizDeck[quizIdx];
+  document.getElementById("quizDomain").textContent = `${card.domain} \u00b7 ${quizIdx + 1}/${quizDeck.length}`;
+  document.getElementById("quizQuestion").textContent = card.q;
+  document.getElementById("quizQuestion").style.display = "block";
+  document.getElementById("quizAnswer").style.display = "none";
+  document.getElementById("quizAnswer").textContent = card.a;
+  document.getElementById("quizHint").textContent = "Tap the card to reveal the answer";
+  document.getElementById("quizGradeActions").style.display = "none";
+  const pct = (quizIdx / quizDeck.length) * 100;
+  document.getElementById("quizProgressFill").style.width = pct + "%";
+}
+
+document.getElementById("quizFlip").addEventListener("click", () => {
+  if(quizRevealed) return;
+  quizRevealed = true;
+  document.getElementById("quizQuestion").style.display = "none";
+  document.getElementById("quizAnswer").style.display = "block";
+  document.getElementById("quizHint").style.display = "none";
+  document.getElementById("quizGradeActions").style.display = "flex";
+});
+
+function nextQuizCard(){
+  quizIdx++;
+  if(quizIdx >= quizDeck.length){
+    showQuizSummary();
+  } else {
+    showQuizCard();
+  }
+}
+
+document.getElementById("quizGotBtn").addEventListener("click", () => {
+  quizScore++;
+  nextQuizCard();
+});
+document.getElementById("quizMissBtn").addEventListener("click", () => {
+  quizMissed.push(quizDeck[quizIdx]);
+  nextQuizCard();
+});
+
+function showQuizSummary(){
+  document.getElementById("quizFlip").style.display = "none";
+  document.getElementById("quizGradeActions").style.display = "none";
+  document.getElementById("quizHint").style.display = "none";
+  document.getElementById("quizProgressFill").style.width = "100%";
+  const pct = quizDeck.length ? Math.round((quizScore / quizDeck.length) * 100) : 0;
+  document.getElementById("quizSummaryScore").textContent = pct + "%";
+  document.getElementById("quizSummarySub").textContent = `${quizScore} of ${quizDeck.length} correct`;
+  document.getElementById("quizDomain").textContent = "Session complete";
+  document.getElementById("quizRetryMissedBtn").style.display = quizMissed.length ? "block" : "none";
+  document.getElementById("quizSummary").style.display = "block";
+}
+
+document.getElementById("quizRetryMissedBtn").addEventListener("click", () => {
+  startQuiz(quizMissed);
+});
+document.getElementById("quizDoneBtn").addEventListener("click", () => {
+  document.getElementById("quizOverlay").classList.remove("active");
+});
+document.getElementById("quizCloseBtn").addEventListener("click", () => {
+  document.getElementById("quizOverlay").classList.remove("active");
+});
+
+document.getElementById("startQuizBtn").addEventListener("click", () => {
+  const deck = flashFilter === "All" ? ALL_CARDS : ALL_CARDS.filter(c => c.domain === flashFilter);
+  startQuiz(deck);
+});
+
+renderFlashTabs();
+renderFlashGrid();
 
 if(store.current && store.profiles[store.current]){
   switchToUser(store.current);
