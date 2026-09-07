@@ -649,6 +649,34 @@
     cursor: pointer;
   }
   .quiz-secondary:hover{ border-color: var(--lime); color: var(--lime); }
+
+  /* ---------- top-level section tabs ---------- */
+  .section-tabs{
+    display: flex;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 18px;
+  }
+  .section-tab{
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--ink-dim);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 0.84rem;
+    padding: 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .section-tab.active{ background: var(--lime); color: #10130a; }
+  .section-tab:hover:not(.active){ color: var(--ink); }
+
+  .tab-panel{ display: none; }
+  .tab-panel.active{ display: block; }
 </style>
 </head>
 <body>
@@ -703,37 +731,46 @@
     </div>
   </div>
 
-  <div class="card heatmap-card">
-    <div class="heatmap-head">
-      <h2>14-day activity</h2>
-      <span id="currentDayLabel">Day 1</span>
+  <div class="section-tabs" id="sectionTabs">
+    <button class="section-tab active" data-tab="plan">Study Plan</button>
+    <button class="section-tab" data-tab="cards">Flashcards</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-plan">
+    <div class="card heatmap-card">
+      <div class="heatmap-head">
+        <h2>14-day activity</h2>
+        <span id="currentDayLabel">Day 1</span>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
     </div>
-    <div class="heatmap-grid" id="heatmapGrid"></div>
+
+    <div class="card domain-card">
+      <h2>By domain</h2>
+      <div id="domainBars"></div>
+    </div>
+
+    <div class="feed-head">
+      <h2>Your plan</h2>
+      <span id="daysDoneLabel">0 / 14 days</span>
+    </div>
+    <div id="feed"></div>
+
+    <button class="reset-btn" id="resetBtn">Reset progress for this profile</button>
+    <div class="save-note">Saved automatically to this browser (localStorage) &mdash; separate per name, per device.</div>
   </div>
 
-  <div class="card domain-card">
-    <h2>By domain</h2>
-    <div id="domainBars"></div>
+  <div class="tab-panel" id="tab-cards">
+    <div class="feed-head" style="margin-top:0;">
+      <h2>Flashcards</h2>
+      <span id="cardCountLabel">0 cards</span>
+    </div>
+    <div class="card flash-card-panel">
+      <div class="flash-tabs" id="flashTabs"></div>
+      <div class="flash-grid" id="flashGrid"></div>
+      <button class="quiz-btn" id="startQuizBtn">Test myself &middot; randomized</button>
+    </div>
   </div>
-
-  <div class="feed-head">
-    <h2>Flashcards</h2>
-    <span id="cardCountLabel">0 cards</span>
-  </div>
-  <div class="card flash-card-panel">
-    <div class="flash-tabs" id="flashTabs"></div>
-    <div class="flash-grid" id="flashGrid"></div>
-    <button class="quiz-btn" id="startQuizBtn">Test myself &middot; randomized</button>
-  </div>
-
-  <div class="feed-head">
-    <h2>Your plan</h2>
-    <span id="daysDoneLabel">0 / 14 days</span>
-  </div>
-  <div id="feed"></div>
-
-  <button class="reset-btn" id="resetBtn">Reset progress for this profile</button>
-  <div class="save-note">Saved automatically to this browser (localStorage) &mdash; separate per name, per device.</div>
 
   <footer>65 questions &middot; 90 minutes &middot; 700 to pass</footer>
 </div>
@@ -864,59 +901,112 @@ const PLAN = [
 ];
 
 // Flashcards drafted from the official AWS Certified AI Practitioner (AIF-C01)
-// Exam Guide content outline (5 domains, task statements 1.1-5.2).
+// Exam Guide content outline, cross-referenced against community exam-prep
+// cheat sheets and practice-question resources for AIF-C01 to broaden coverage.
+// Answers are kept short by design for fast drilling.
 const FLASHCARDS = [
   { domain: "Domain 1", label: "AI & ML Fundamentals", cards: [
-    { q: "How do AI, ML, and deep learning relate to each other?", a: "AI is the broadest field (systems that mimic intelligent behavior). ML is a subset of AI that learns patterns from data instead of explicit rules. Deep learning is a subset of ML using multi-layer neural networks." },
-    { q: "What's the difference between batch and real-time inferencing?", a: "Batch inference processes a large set of data on a schedule, no immediate response needed. Real-time inference returns a prediction immediately for a single request via a live endpoint." },
-    { q: "Distinguish supervised, unsupervised, and reinforcement learning.", a: "Supervised: learns from labeled input-output pairs. Unsupervised: finds structure in unlabeled data (e.g. clustering). Reinforcement: learns via trial and error using rewards/penalties from an environment." },
-    { q: "Name five AWS pretrained AI services covered on the exam and what each does.", a: "Amazon Transcribe (speech-to-text), Amazon Translate (language translation), Amazon Comprehend (NLP/text analysis), Amazon Lex (conversational chatbots), Amazon Polly (text-to-speech)." },
-    { q: "List the main stages of an ML pipeline.", a: "Data collection \u2192 exploratory data analysis \u2192 data pre-processing \u2192 feature engineering \u2192 model training \u2192 hyperparameter tuning \u2192 evaluation \u2192 deployment \u2192 monitoring." },
-    { q: "What does MLOps mean at a conceptual level?", a: "Applying DevOps-style discipline to ML: repeatable processes, scalable systems, experiment tracking, managing technical debt, and continuous model monitoring and re-training in production." },
-    { q: "Give an example of a model performance metric and a business metric.", a: "Model metrics: accuracy, AUC, F1 score. Business metrics: cost per user, development cost, customer feedback, ROI." },
-    { q: "When is an AI/ML solution NOT the right choice?", a: "When a cost-benefit analysis doesn't justify it, or when the situation requires a guaranteed/deterministic outcome rather than a probabilistic prediction." }
+    { q: "How do AI, ML, and deep learning relate?", a: "AI is the broad field. ML is a subset that learns from data. Deep learning is a subset of ML using multi-layer neural networks." },
+    { q: "Model vs algorithm?", a: "Algorithm is the method used to learn (e.g. regression, trees). Model is the trained result." },
+    { q: "Training vs inference?", a: "Training learns parameters from data. Inference uses the trained model to predict." },
+    { q: "Underfitting vs overfitting?", a: "Underfitting: too simple, misses patterns. Overfitting: too tailored to training data, fails to generalize." },
+    { q: "Bias vs fairness?", a: "Bias is systematic skew in outputs. Fairness is equitable outcomes across groups." },
+    { q: "Supervised vs unsupervised vs reinforcement learning?", a: "Supervised uses labeled data. Unsupervised finds structure in unlabeled data. Reinforcement learns via reward/penalty." },
+    { q: "Real-time vs batch inference?", a: "Real-time: low-latency, single requests. Batch: high-throughput, scheduled scoring." },
+    { q: "Structured vs unstructured data?", a: "Structured is tabular (rows/columns). Unstructured is text, images, or audio." },
+    { q: "Labeled vs unlabeled data?", a: "Labeled data has known outputs attached; unlabeled data does not." },
+    { q: "Regression vs classification vs clustering?", a: "Regression predicts a number. Classification predicts a category. Clustering groups unlabeled data." },
+    { q: "List the ML pipeline stages.", a: "Collect \u2192 explore \u2192 preprocess \u2192 engineer features \u2192 train \u2192 tune \u2192 evaluate \u2192 deploy \u2192 monitor." },
+    { q: "What is MLOps, briefly?", a: "DevOps discipline for ML: repeatable, scalable, monitored, retrainable systems." },
+    { q: "Name a model metric and a business metric.", a: "Model: F1 score or AUC. Business: ROI or cost per user." },
+    { q: "SageMaker Data Wrangler vs Feature Store vs Model Monitor?", a: "Data Wrangler preps data. Feature Store manages reusable features. Model Monitor watches production drift." },
+    { q: "Managed API vs self-hosted API for a model?", a: "Managed: provider-run endpoint (e.g. Bedrock). Self-hosted: you run and maintain it." },
+    { q: "Name three real-world AI application areas.", a: "Computer vision, fraud detection, recommendation systems." },
+    { q: "When is AI/ML NOT the right solution?", a: "When cost doesn't justify it, or a guaranteed outcome is needed instead of a prediction." },
+    { q: "What is a neural network, briefly?", a: "A layered network of nodes that learns patterns by adjusting weighted connections." }
   ]},
   { domain: "Domain 2", label: "Generative AI Fundamentals", cards: [
-    { q: "Define \u201cfoundation model.\u201d", a: "A large model pre-trained on broad, diverse data that can be adapted to many downstream tasks via prompting, fine-tuning, or other techniques." },
-    { q: "What's a token, and what's chunking?", a: "A token is a unit of text (word/sub-word/character) a model processes. Chunking splits large documents into smaller pieces so they fit a model's context window, often for RAG." },
-    { q: "What are embeddings/vectors used for?", a: "Numeric representations of meaning in high-dimensional space, so semantically similar items sit close together \u2014 the basis for semantic search and RAG retrieval." },
-    { q: "List the stages of the foundation model lifecycle.", a: "Data selection \u2192 model selection \u2192 pre-training \u2192 fine-tuning \u2192 evaluation \u2192 deployment \u2192 feedback." },
-    { q: "Name a key advantage and a key disadvantage of generative AI.", a: "Advantage: adaptability/responsiveness/simplicity to use. Disadvantage: hallucinations, weak interpretability, and nondeterminism (same prompt, different outputs)." },
-    { q: "What is Amazon Bedrock?", a: "A fully managed service giving API access to multiple foundation models from different providers, without managing any underlying infrastructure." },
-    { q: "How does Bedrock differ from SageMaker JumpStart for gen AI?", a: "Bedrock gives serverless API access to third-party and Amazon foundation models. JumpStart provides pre-built models/solutions you deploy on your own SageMaker infrastructure for more control." },
-    { q: "What's the cost tradeoff between token-based pricing and provisioned throughput?", a: "Token-based pricing is pay-as-you-go, good for variable workloads. Provisioned throughput reserves fixed capacity for predictable, high-volume, low-latency needs." }
+    { q: "What is a token?", a: "A unit of text (word or sub-word) a model reads or writes." },
+    { q: "What is a context window?", a: "The max tokens (input + output) a model can consider at once." },
+    { q: "What is chunking, and why?", a: "Splitting large text into smaller pieces, often to fit a context window for RAG." },
+    { q: "Embeddings vs vectors?", a: "Embeddings are the meaning-representations; vectors are the number arrays that store them." },
+    { q: "What is prompt engineering, one line?", a: "Designing instructions, context, and examples to steer model output." },
+    { q: "What architecture underlies most LLMs?", a: "The transformer (attention-based) architecture." },
+    { q: "Define \u201cfoundation model.\u201d", a: "A large, general-purpose model adaptable to many downstream tasks." },
+    { q: "Multi-modal vs diffusion model?", a: "Multi-modal handles multiple types (text+image). Diffusion models are typically used for image generation." },
+    { q: "Name four gen AI use cases.", a: "Summarization, chatbots, code generation, translation." },
+    { q: "List the foundation model lifecycle stages.", a: "Data selection \u2192 model selection \u2192 pre-training \u2192 fine-tuning \u2192 evaluation \u2192 deployment \u2192 feedback." },
+    { q: "Name two advantages of generative AI.", a: "Adaptability and fast responsiveness." },
+    { q: "Name two disadvantages of generative AI.", a: "Hallucinations and nondeterminism." },
+    { q: "What factors affect choosing a gen AI model?", a: "Model type, performance needs, cost, and compliance constraints." },
+    { q: "Name a gen AI business metric.", a: "Conversion rate, or average revenue per user." },
+    { q: "What is Amazon Bedrock?", a: "Managed access to multiple foundation models through one API." },
+    { q: "What is PartyRock?", a: "A no-code playground built on Amazon Bedrock for prototyping." },
+    { q: "What is Amazon Q?", a: "An AWS generative AI assistant for work, developer, and AWS-console tasks." },
+    { q: "SageMaker JumpStart vs Bedrock?", a: "JumpStart deploys pre-built models on your own SageMaker infra. Bedrock gives serverless API access instead." },
+    { q: "Token-based pricing vs provisioned throughput?", a: "Token-based is pay-as-you-go and flexible. Provisioned throughput reserves fixed, predictable capacity." },
+    { q: "Name a benefit of building gen AI on AWS infrastructure.", a: "Built-in security, compliance, and responsibility controls." }
   ]},
   { domain: "Domain 3", label: "Foundation Model Applications", cards: [
-    { q: "What criteria matter when choosing a pre-trained foundation model?", a: "Cost, modality, latency, multi-lingual support, model size/complexity, customization needs, and input/output length limits." },
-    { q: "What does the \u201ctemperature\u201d inference parameter control?", a: "How random/creative vs. deterministic/focused the output is \u2014 higher temperature means more varied output, lower means more consistent output." },
-    { q: "Define RAG and its main benefit.", a: "Retrieval Augmented Generation retrieves relevant external data at query time and feeds it into the prompt, so the model can use up-to-date or proprietary information without retraining." },
-    { q: "Name AWS services that can store vector embeddings for RAG.", a: "Amazon OpenSearch Service, Amazon Aurora, Amazon Neptune, Amazon DocumentDB (MongoDB-compatible), and Amazon RDS for PostgreSQL." },
-    { q: "Rank foundation model customization approaches by cost/complexity, cheapest first.", a: "In-context learning (prompting) \u2192 RAG \u2192 fine-tuning \u2192 full pre-training, roughly increasing in cost and complexity." },
-    { q: "What's the role of an \u201cagent\u201d in a gen AI application?", a: "An agent (e.g. Agents for Amazon Bedrock) orchestrates multi-step tasks by deciding which tools, APIs, or knowledge bases to call in sequence to complete a complex request." },
-    { q: "Name four prompt engineering techniques.", a: "Zero-shot (no examples), single-shot (one example), few-shot (several examples), and chain-of-thought (ask the model to reason step by step)." },
-    { q: "Name four prompt-related risks.", a: "Prompt exposure (leaking the system prompt), poisoning (corrupting training/retrieval data), hijacking, and jailbreaking (bypassing guardrails)." },
-    { q: "What's the difference between fine-tuning and continuous pre-training?", a: "Fine-tuning adapts a model to a specific task/domain using a smaller labeled dataset. Continuous pre-training keeps training the base model on new unlabeled data to expand general knowledge." },
-    { q: "Name two metrics used to evaluate foundation model output, and what they measure.", a: "ROUGE (overlap for summarization tasks) and BLEU (overlap for translation quality); BERTScore compares semantic similarity via embeddings." }
+    { q: "Name four criteria for choosing a pre-trained model.", a: "Cost, latency, modality, and customization needs." },
+    { q: "What does \u201ctemperature\u201d control?", a: "Randomness of output \u2014 higher means more varied, lower means more consistent." },
+    { q: "What does max output tokens control?", a: "The length cap on the generated response." },
+    { q: "Define RAG in one line.", a: "Retrieving relevant external content and feeding it to a model to generate grounded answers." },
+    { q: "Why use RAG instead of fine-tuning?", a: "Cheaper and faster to keep answers current, without retraining the model." },
+    { q: "Name AWS's managed RAG building block.", a: "Amazon Bedrock Knowledge Bases." },
+    { q: "Name three AWS vector storage options.", a: "Amazon OpenSearch Service, Amazon Aurora, Amazon RDS for PostgreSQL." },
+    { q: "Rank customization approaches, cheapest first.", a: "Prompting \u2192 RAG \u2192 fine-tuning \u2192 full pre-training." },
+    { q: "In-context learning vs fine-tuning?", a: "In-context uses examples in the prompt, no training. Fine-tuning updates the model's weights." },
+    { q: "What is instruction tuning?", a: "Fine-tuning a model to better follow natural-language instructions." },
+    { q: "What is continuous pre-training?", a: "Ongoing training on new unlabeled data to expand general knowledge." },
+    { q: "What is transfer learning, briefly?", a: "Reusing a pre-trained model's knowledge for a related task." },
+    { q: "What is RLHF?", a: "Reinforcement Learning from Human Feedback \u2014 tuning behavior using human preference data." },
+    { q: "What data qualities matter most for fine-tuning?", a: "Curation, sufficient size, labeling quality, and representativeness." },
+    { q: "What is an \u201cagent\u201d in a gen AI context?", a: "A system that plans and executes multi-step tasks by calling tools or APIs." },
+    { q: "Name AWS's agent offering.", a: "Agents for Amazon Bedrock." },
+    { q: "Zero-shot vs few-shot prompting?", a: "Zero-shot gives no examples. Few-shot gives several examples in the prompt." },
+    { q: "What is chain-of-thought prompting?", a: "Asking the model to reason step by step before answering." },
+    { q: "Name three prompt engineering risks.", a: "Prompt injection/hijacking, jailbreaking, and data poisoning." },
+    { q: "What is a negative prompt?", a: "An instruction telling the model what to avoid producing." },
+    { q: "ROUGE vs BLEU vs BERTScore?", a: "ROUGE: summarization overlap. BLEU: translation overlap. BERTScore: semantic similarity." },
+    { q: "Human evaluation vs benchmark datasets?", a: "Human eval is subjective human judgment. Benchmarks are standardized automated test sets." },
+    { q: "What is prompt caching used for?", a: "Reusing a processed prompt prefix to cut cost and latency on repeated calls." }
   ]},
   { domain: "Domain 4", label: "Responsible AI", cards: [
-    { q: "Name the core features of responsible AI referenced by AWS.", a: "Bias, fairness, inclusivity, robustness, safety, and veracity." },
-    { q: "What does Amazon SageMaker Clarify help you do?", a: "Detect bias in training data and model predictions, and help explain model behavior." },
-    { q: "Name a legal risk specific to generative AI outputs.", a: "Intellectual property infringement claims from AI-generated content, plus risks from biased outputs, hallucinations, and resulting loss of customer trust." },
-    { q: "What characteristics should a good training dataset have?", a: "Inclusivity, diversity, curated sourcing, and balance across relevant groups or classes." },
-    { q: "Distinguish bias from variance in plain terms.", a: "Bias is systematic error that makes a model consistently miss patterns (underfitting). Variance is sensitivity to training data noise that makes a model overfit." },
-    { q: "What is Amazon Augmented AI (A2I) used for?", a: "Adding a human review step into ML predictions \u2014 routing low-confidence or high-stakes outputs to a human before acting on them." },
-    { q: "What are SageMaker Model Cards for?", a: "Documenting a model's intended use, training data, performance, and limitations \u2014 supporting transparency and explainability." },
-    { q: "What's the tradeoff between model transparency and performance?", a: "More interpretable/transparent models are often easier to explain but may sacrifice some predictive performance compared to complex \u201cblack box\u201d models." }
+    { q: "Name the six core responsible AI features.", a: "Bias, fairness, inclusivity, robustness, safety, veracity." },
+    { q: "What is veracity, in this context?", a: "Truthfulness and factual grounding of model outputs." },
+    { q: "Name a legal risk unique to gen AI.", a: "IP infringement claims arising from AI-generated content." },
+    { q: "Name three desirable dataset characteristics.", a: "Inclusivity, diversity, and balance." },
+    { q: "High bias vs high variance?", a: "High bias: underfitting, too simple. High variance: overfitting, too sensitive to training data." },
+    { q: "What does subgroup analysis check for?", a: "Performance gaps across different demographic groups." },
+    { q: "What does Amazon SageMaker Clarify do?", a: "Detects bias and helps explain model behavior." },
+    { q: "What does SageMaker Model Monitor do here?", a: "Tracks drift and data quality over time in production." },
+    { q: "What is Amazon Augmented AI (A2I) for?", a: "Routing low-confidence predictions to human reviewers." },
+    { q: "What are Guardrails for Amazon Bedrock?", a: "Configurable policy and safety controls for gen AI applications." },
+    { q: "What are SageMaker Model Cards for?", a: "Documenting a model's intended use, data, and limitations." },
+    { q: "Transparent vs explainable model?", a: "Transparent: inherently understandable, often simple. Explainable: complex model with added explanations." },
+    { q: "What's the key tradeoff in model transparency?", a: "Interpretability vs raw predictive performance." },
+    { q: "What is human-centered design for explainable AI?", a: "Building explanations around what end users actually need to trust the output." },
+    { q: "Name a responsible practice in model selection.", a: "Weighing environmental impact and sustainability of the chosen model." },
+    { q: "What's a common effect of biased training data?", a: "Skewed or unfair outcomes for specific demographic groups." }
   ]},
   { domain: "Domain 5", label: "Security, Compliance & Governance", cards: [
-    { q: "State the AWS shared responsibility model in one sentence.", a: "AWS secures the underlying cloud infrastructure (\u201csecurity of the cloud\u201d); the customer secures what they build and configure on top, including their AI/ML data and models (\u201csecurity in the cloud\u201d)." },
-    { q: "What does Amazon Macie do?", a: "Uses ML to automatically discover, classify, and help protect sensitive data such as PII stored in Amazon S3." },
-    { q: "What is AWS PrivateLink used for in an AI context?", a: "Privately connecting to AWS services (e.g. Bedrock) from your VPC without traversing the public internet, reducing exposure." },
-    { q: "What is data lineage, and what helps document it for a model?", a: "Data lineage tracks where data originated and how it was transformed. SageMaker Model Cards help document data origins and model details for traceability." },
-    { q: "Name three AWS governance/compliance services and what each is for.", a: "AWS Config (tracks resource configuration compliance), AWS Audit Manager (automates evidence collection for audits), AWS Artifact (on-demand access to AWS compliance reports/agreements)." },
-    { q: "Name two compliance standards referenced for AI systems.", a: "ISO standards and SOC (System and Organization Controls) reports, alongside emerging algorithm accountability laws." },
-    { q: "What is the Generative AI Security Scoping Matrix?", a: "A governance framework that helps organizations classify gen AI use cases by risk/responsibility level, to apply the right security and compliance controls." },
-    { q: "Name a data governance strategy element for AI systems.", a: "Data lifecycle management, logging, data residency requirements, ongoing monitoring, and defined retention policies." }
+    { q: "State the AWS shared responsibility model, briefly.", a: "AWS secures the cloud infrastructure; you secure what you configure and run on it." },
+    { q: "What does IAM control?", a: "Roles, policies, and permissions for accessing AWS resources." },
+    { q: "What does Amazon Macie do?", a: "Discovers and classifies sensitive data, like PII, in Amazon S3." },
+    { q: "What does AWS PrivateLink provide?", a: "Private connectivity to AWS services without using the public internet." },
+    { q: "Encryption at rest vs in transit?", a: "At rest protects stored data. In transit protects data moving over a network." },
+    { q: "What is data lineage?", a: "A record of where data came from and how it was transformed." },
+    { q: "What is prompt injection, security-wise?", a: "An attack that manipulates a model via crafted input to bypass intended behavior." },
+    { q: "What does AWS CloudTrail do?", a: "Logs API activity for auditing." },
+    { q: "What does AWS Config do?", a: "Tracks resource configuration and compliance over time." },
+    { q: "What does AWS Audit Manager do?", a: "Automates evidence collection for audits." },
+    { q: "What does AWS Artifact provide?", a: "On-demand access to AWS compliance reports and agreements." },
+    { q: "What does Amazon Inspector do?", a: "Scans workloads for vulnerabilities." },
+    { q: "What does AWS Trusted Advisor check?", a: "Best-practice recommendations across cost, security, and performance." },
+    { q: "Name two compliance standards relevant to AI.", a: "ISO standards and SOC reports." },
+    { q: "What is the Generative AI Security Scoping Matrix?", a: "A framework for classifying gen AI use cases by risk, to apply the right controls." },
+    { q: "Name three elements of a data governance strategy.", a: "Data lifecycle, retention policy, and residency requirements." }
   ]}
 ];
 
@@ -1307,6 +1397,16 @@ document.getElementById("startQuizBtn").addEventListener("click", () => {
 
 renderFlashTabs();
 renderFlashGrid();
+
+// ---------- top-level section tabs ----------
+document.getElementById("sectionTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".section-tab");
+  if(!btn) return;
+  document.querySelectorAll(".section-tab").forEach(b => b.classList.toggle("active", b === btn));
+  const target = btn.dataset.tab;
+  document.getElementById("tab-plan").classList.toggle("active", target === "plan");
+  document.getElementById("tab-cards").classList.toggle("active", target === "cards");
+});
 
 if(store.current && store.profiles[store.current]){
   switchToUser(store.current);
